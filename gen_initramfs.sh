@@ -3,6 +3,15 @@
 
 CPIO_ARGS="--quiet -o -H newc"
 
+copy_binaries() {
+
+	local destdir=$1 files=$2
+
+	# Copy files
+	lddtree $files | tr ')(' '\n' |awk  '/=>/{ if($3 ~ /^\//){print $3}}' | sort | uniq | cpio -p --make-directories --dereference --quiet $destdir
+
+}
+
 append_base_layout() {
 	if [ -d "${TEMP}/initramfs-base-temp" ]
 	then
@@ -155,32 +164,8 @@ append_multipath(){
 	mkdir -p "${TEMP}/initramfs-multipath-temp/sbin/"
 	mkdir -p "${TEMP}/initramfs-multipath-temp/lib/"
 
-	# Copy files to /lib
-	for i in /lib/{ld-*,libc-*,libc.*,libdl-*,libdl.*,libdevmapper*so*,libpthread*,librt*,libreadline*,libncurses*}
-	do
-		cp -a "${i}" "${TEMP}/initramfs-multipath-temp/lib" \
-			|| gen_die "Could not copy file ${i} for MULTIPATH"
-	done
-
-	for i in /usr/lib/libaio*
-	do
-		 cp -a "${i}" "${TEMP}/initramfs-multipath-temp/lib" \
-			|| gen_die "Could not copy file ${i} for MULTIPATH"
-	done
-
-	# Copy files to /sbin
-	for i in /sbin/{multipath,kpartx,mpath_prio_*,devmap_name,dmsetup} /lib64/udev/scsi_id
-	do
-		cp -a "${i}" "${TEMP}/initramfs-multipath-temp/sbin" \
-			|| gen_die "Could not copy file ${i} for MULTIPATH"
-	done
-
-	# Copy files to /bin
-	for i in /bin/mountpoint
-	do
-		cp -a "${i}" "${TEMP}/initramfs-multipath-temp/bin" \
-			|| gen_die "Could not copy file ${i} for MULTIPATH"
-	done
+	# Copy files
+	copy_binaries "${TEMP}/initramfs-multipath-temp" "$(echo /sbin/{multipath,kpartx,mpath_prio_*,devmap_name,dmsetup} /lib64/udev/scsi_id /bin/mountpoint)"
 
 	if [ -x /sbin/multipath ]
 	then
@@ -341,6 +326,31 @@ append_mdadm(){
 			|| gen_die "compressing mdadm cpio"
 	cd "${TEMP}"
 	rm -rf "${TEMP}/initramfs-mdadm-temp" > /dev/null
+}
+
+append_zfs(){
+	if [ -d "${TEMP}/initramfs-zfs-temp" ]
+	then
+		rm -r "${TEMP}/initramfs-zfs-temp"
+	fi
+
+	mkdir -p "${TEMP}/initramfs-zfs-temp/etc/zfs/"
+
+	# Copy files to /etc/zfs
+	for i in /etc/zfs/{zdev.conf,zpool.cache}
+	do
+		cp -a "${i}" "${TEMP}/initramfs-zfs-temp/etc/zfs" \
+			|| gen_die "Could not copy file ${i} for ZFS"
+	done
+
+	# Copy binaries
+	copy_binaries "${TEMP}/initramfs-zfs-temp" "$(echo /sbin/{mount.zfs,zfs,zpool})"
+
+	cd "${TEMP}/initramfs-zfs-temp/"
+	find . -print | cpio ${CPIO_ARGS} --append -F "${CPIO}" \
+			|| gen_die "compressing zfs cpio"
+	cd "${TEMP}"
+	rm -rf "${TEMP}/initramfs-zfs-temp" > /dev/null
 }
 
 append_splash(){
@@ -656,6 +666,8 @@ create_initramfs() {
 	else
 		print_info 1 "initramfs: Not copying modules..."
 	fi
+
+	append_data 'zfs' "${ZFS}"
 
 	append_data 'blkid' "${DISKLABEL}"
 
