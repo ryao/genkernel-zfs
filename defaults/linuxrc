@@ -97,11 +97,16 @@ do
 			USE_DMRAID_NORMAL=1
 		;;
 		dozfs*)
-			USE_ZFS=1
-			MY_HWOPTS=$(echo ${MY_HWOPTS} zfs)
-			if [ "${x#*=}" = 'force' ]
-			then
-				ZPOOL_FORCE=-f
+			if [ ! -x /sbin/zfs ]; then
+				USE_ZFS=0
+				bad_msg 'zfs binary not found: aborting use of zfs!'
+			else
+				USE_ZFS=1
+				MY_HWOPTS="${MY_HWOPTS} zfs"
+				if [ "${x#*=}" = 'force' ]
+				then
+					ZPOOL_FORCE=-f
+				fi
 			fi
 		;;
 		# Debug Options

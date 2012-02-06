@@ -5,6 +5,47 @@
 # Distributed under the GPL v2
 # $Id$
 
+  06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> arch/alpha/config.sh,
+  arch/arm/config.sh, arch/ia64/config.sh, arch/mips/config.sh,
+  arch/parisc/config.sh, arch/parisc64/config.sh, arch/ppc/config.sh,
+  arch/ppc64/config.sh, arch/sparc/config.sh, arch/sparc64/config.sh,
+  arch/um/config.sh, arch/x86/config.sh, arch/x86_64/config.sh:
+  Ensure default for new initramfs compression is used.
+
+  06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> gen_initramfs.sh:
+  Bugfixes in new code branches that I didn't test fully.
+
+  06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> doc/genkernel.8.txt,
+  gen_cmdline.sh:
+  Update documentation for new initramfs compression.
+
+  06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> defaults/config.sh,
+  gen_cmdline.sh, gen_determineargs.sh, gen_initramfs.sh, genkernel.conf:
+  Import customizable compression for initramfs, based on Pentoo development.
+
+  06 Feb 2012: Richard Yao <ryao@cs.stonybrook.edu> arch/alpha/modules_load,
+  arch/arm/modules_load, arch/ia64/modules_load, arch/mips/modules_load,
+  arch/parisc/modules_load, arch/parisc64/modules_load, arch/ppc/modules_load,
+  arch/ppc64/modules_load, arch/sparc/modules_load, arch/sparc64/modules_load,
+  arch/um/modules_load, arch/x86/modules_load, arch/x86_64/modules_load,
+  defaults/busy-config, defaults/initrd.scripts, defaults/linuxrc,
+  defaults/modules_load, doc/genkernel.8.txt, gen_cmdline.sh,
+  gen_determineargs.sh, gen_initramfs.sh, genkernel:
+  This provides ZFS support, to go with the sys-fs/zfs package.
+
+  06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> gen_initramfs.sh:
+  Refactor copy_binaries and multipath slightly for ease of usage and readability.
+
+  06 Feb 2012: Richard Yao <ryao@cs.stonybrook.edu> gen_initramfs.sh:
+  Refactor multipath initramfs generation using copy_binaries.
+
+  06 Feb 2012: Richard Yao <ryao@cs.stonybrook.edu> gen_initramfs.sh:
+  copy_binaries utility function for putting binaries and librares into
+  initramfs (see git commit for full details).
+
+  06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> defaults/initrd.scripts:
+  Support virtio devices, and provide fallback of all remaining devices.
+
   03 Feb 2012; Sebastian Pipping <sping@gentoo.org> defaults/initrd.scripts:
   Support SD card readers. Patch by Rick Farina
 
