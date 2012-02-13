@@ -461,6 +461,10 @@ do
 				ROOT_DEV="${REAL_ROOT#*=}"
 				if [ "${ROOT_DEV}" != 'ZFS' ] 
 				then
+					# Workaround upstream bug that prevents zvols from appearing
+					/sbin/zpool export "${ROOT_DEV%%/*}"
+					/sbin/zpool import -N "${ROOT_DEV%%/*}"
+
 					zfs get type ${ROOT_DEV} > /dev/null
 
 					if [ "$?" = '0' ]
@@ -471,8 +475,20 @@ do
 					fi
 				else
 					BOOTFS=$(/sbin/zpool list -H -o bootfs)
+
+					if [ "${BOOTFS}" = '-' ]
+					then
+						/sbin/zpool import -N -a ${ZPOOL_FORCE}
+						BOOTFS=$(/sbin/zpool list -H -o bootfs)
+					fi
+
+
 					if [ "${BOOTFS}" != '-' ]
 					then
+						
+						# Workaround upstream bug that prevents zvols from appearing
+						/sbin/zpool export "${BOOTFS%%/*}"
+						/sbin/zpool import -N "${BOOTFS%%/*}"
 
 						for i in ${BOOTFS}
 						do
