@@ -80,6 +80,10 @@ export_utils_args()
 	then
 		export AS="${UTILS_AS}"
 	fi
+	if [ "${UTILS_CROSS_COMPILE}" != '' ]
+	then
+		export CROSS_COMPILE="${UTILS_CROSS_COMPILE}"
+	fi
 }
 
 unset_utils_args()
@@ -99,6 +103,10 @@ unset_utils_args()
 	if [ "${UTILS_AS}" != '' ]
 	then
 		unset AS
+	fi
+	if [ "${UTILS_CROSS_COMPILE}" != '' ]
+	then
+		unset CROSS_COMPILE
 	fi
 	reset_args
 }
@@ -411,7 +419,7 @@ compile_busybox() {
 		print_info 1 'busybox: >> Copying to cache...'
 		[ -f "${TEMP}/${BUSYBOX_DIR}/busybox" ] ||
 			gen_die 'Busybox executable does not exist!'
-		strip "${TEMP}/${BUSYBOX_DIR}/busybox" ||
+		${UTILS_CROSS_COMPILE}strip "${TEMP}/${BUSYBOX_DIR}/busybox" ||
 			gen_die 'Could not strip busybox binary!'
 		tar -cj -C "${TEMP}/${BUSYBOX_DIR}" -f "${BUSYBOX_BINCACHE}" busybox .config .config.gk_orig ||
 			gen_die 'Could not create the busybox bincache!'
@@ -449,10 +457,10 @@ compile_lvm() {
 
 		cd "${TEMP}/lvm"
 		print_info 1 '      >> Copying to bincache...'
-		strip "sbin/lvm.static" ||
+		${UTILS_CROSS_COMPILE}strip "sbin/lvm.static" ||
 			gen_die 'Could not strip lvm.static!'
 		# See bug 382555
-		strip "sbin/dmsetup.static" ||
+		${UTILS_CROSS_COMPILE}strip "sbin/dmsetup.static" ||
 			gen_die 'Could not strip dmsetup.static'
 		/bin/tar -cjf "${LVM_BINCACHE}" sbin/lvm.static sbin/dmsetup.static ||
 			gen_die 'Could not create binary cache'
@@ -492,7 +500,7 @@ compile_mdadm() {
 		install -m 0755 -s mdmon "${TEMP}/mdadm/sbin/mdmon"
 		print_info 1 '      >> Copying to bincache...'
 		cd "${TEMP}/mdadm"
-		strip "sbin/mdadm" "sbin/mdmon" ||
+		${UTILS_CROSS_COMPILE}strip "sbin/mdadm" "sbin/mdmon" ||
 			gen_die 'Could not strip mdadm binaries!'
 		/bin/tar -cjf "${MDADM_BINCACHE}" sbin/mdadm sbin/mdmon ||
 			gen_die 'Could not create binary cache'
@@ -551,38 +559,7 @@ compile_dmraid() {
 }
 
 compile_device_mapper() {
-	if [ ! -f "${DEVICE_MAPPER_BINCACHE}" ]
-	then
-		[ ! -f "${DEVICE_MAPPER_SRCTAR}" ] &&
-			gen_die "Could not find device-mapper source tarball: ${DEVICE_MAPPER_SRCTAR}. Please place it there, or place another version, changing /etc/genkernel.conf as necessary!"
-		cd "${TEMP}"
-		rm -rf "${DEVICE_MAPPER_DIR}"
-		/bin/tar -zxpf "${DEVICE_MAPPER_SRCTAR}"
-		[ ! -d "${DEVICE_MAPPER_DIR}" ] &&
-			gen_die "device-mapper directory ${DEVICE_MAPPER_DIR} invalid"
-		cd "${DEVICE_MAPPER_DIR}"
-		apply_patches device-mapper ${DEVICE_MAPPER_VER}
-		CFLAGS="-fPIC" \
-		./configure --prefix=${TEMP}/device-mapper --enable-static_link \
-			--disable-selinux >> ${LOGFILE} 2>&1 ||
-			gen_die 'Configuring device-mapper failed!'
-		print_info 1 'device-mapper: >> Compiling...'
-		compile_generic '' utils
-		compile_generic 'install' utils
-		print_info 1 '        >> Copying to cache...'
-		cd "${TEMP}"
-		rm -rf "${TEMP}/device-mapper/man" ||
-			gen_die 'Could not remove manual pages!'
-		strip "${TEMP}/device-mapper/sbin/dmsetup" ||
-			gen_die 'Could not strip dmsetup binary!'
-		/bin/tar -jcpf "${DEVICE_MAPPER_BINCACHE}" device-mapper ||
-			gen_die 'Could not tar up the device-mapper binary!'
-		[ -f "${DEVICE_MAPPER_BINCACHE}" ] ||
-			gen_die 'device-mapper cache not created!'
-		cd "${TEMP}"
-		rm -rf "${DEVICE_MAPPER_DIR}" > /dev/null
-		rm -rf "${TEMP}/device-mapper" > /dev/null
-	fi
+	compile_lvm
 }
 
 compile_e2fsprogs() {
@@ -607,7 +584,7 @@ compile_e2fsprogs() {
 		print_info 1 'blkid: >> Copying to cache...'
 		[ -f "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ] ||
 			gen_die 'Blkid executable does not exist!'
-		strip "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ||
+		${UTILS_CROSS_COMPILE}strip "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ||
 			gen_die 'Could not strip blkid binary!'
 		bzip2 "${TEMP}/${E2FSPROGS_DIR}/misc/blkid" ||
 			gen_die 'bzip2 compression of blkid failed!'
@@ -641,7 +618,7 @@ compile_fuse() {
 #		print_info 1 'libfuse: >> Copying to cache...'
 #		[ -f "${TEMP}/${FUSE_DIR}/lib/.libs/libfuse.so" ] ||
 #			gen_die 'libfuse.so does not exist!'
-#		strip "${TEMP}/${FUSE_DIR}/lib/.libs/libfuse.so" ||
+#		${UTILS_CROSS_COMPILE}strip "${TEMP}/${FUSE_DIR}/lib/.libs/libfuse.so" ||
 #			gen_die 'Could not strip libfuse.so!'
 #		cd "${TEMP}/${FUSE_DIR}/lib/.libs"
 #		tar -cjf "${FUSE_BINCACHE}" libfuse*so* ||
@@ -675,7 +652,7 @@ compile_unionfs_fuse() {
 		print_info 1 'unionfs-fuse: >> Copying to cache...'
 		[ -f "${TEMP}/${UNIONFS_FUSE_DIR}/src/unionfs" ] ||
 			gen_die 'unionfs binary does not exist!'
-		strip "${TEMP}/${UNIONFS_FUSE_DIR}/src/unionfs" ||
+		${UTILS_CROSS_COMPILE}strip "${TEMP}/${UNIONFS_FUSE_DIR}/src/unionfs" ||
 			gen_die 'Could not strip unionfs binary!'
 		bzip2 "${TEMP}/${UNIONFS_FUSE_DIR}/src/unionfs" ||
 			gen_die 'bzip2 compression of unionfs binary failed!'
@@ -725,7 +702,7 @@ compile_iscsi() {
 		print_info 1 'iscsistart: >> Copying to cache...'
 		[ -f "${TEMP}/${ISCSI_DIR}/usr/iscsistart" ] ||
 			gen_die 'iscsistart executable does not exist!'
-		strip "${TEMP}/${ISCSI_DIR}/usr/iscsistart" ||
+		${UTILS_CROSS_COMPILE}strip "${TEMP}/${ISCSI_DIR}/usr/iscsistart" ||
 			gen_die 'Could not strip iscsistart binary!'
 		bzip2 "${TEMP}/${ISCSI_DIR}/usr/iscsistart" ||
 			gen_die 'bzip2 compression of iscsistart failed!'
@@ -772,7 +749,7 @@ compile_gpg() {
 		print_info 1 'gnupg: >> Copying to cache...'
 		[ -f "${TEMP}/${GPG_DIR}/g10/gpg" ] ||
 			gen_die 'gnupg executable does not exist!'
-		strip "${TEMP}/${GPG_DIR}/g10/gpg" ||
+		${UTILS_CROSS_COMPILE}strip "${TEMP}/${GPG_DIR}/g10/gpg" ||
 			gen_die 'Could not strip gpg binary!'
 		bzip2 -z -c "${TEMP}/${GPG_DIR}/g10/gpg" > "${GPG_BINCACHE}" ||
 			gen_die 'Could not copy the gpg binary to the package directory, does the directory exist?'

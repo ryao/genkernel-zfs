@@ -5,6 +5,41 @@
 # Distributed under the GPL v2
 # $Id$
 
+  12 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> gen_compile.sh:
+  More UTILS_CROSS_COMPILE prefix on strip calls.
+
+  12 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> arch/alpha/modules_load,
+  arch/arm/modules_load, arch/ia64/modules_load, arch/mips/modules_load,
+  arch/parisc/modules_load, arch/parisc64/modules_load, arch/ppc/modules_load,
+  arch/ppc64/modules_load, arch/sparc/modules_load, arch/sparc64/modules_load,
+  arch/um/modules_load, arch/x86/modules_load, arch/x86_64/modules_load,
+  defaults/modules_load:
+  Bug #401583: include more DM and MD modules for other RAID/LVM
+  configurations.
+
+  12 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> gen_compile.sh:
+  Bug #265005: ensure CROSS_COMPILE is set for cross-compile strip calls to
+  work.
+
+  12 Feb 2012; Robin H. Johnson <robbat2@gentoo.org>
+  +patches/dmraid/dmraid-1.0.0_rc16-as-needed2.patch,
+  +patches/dmraid/dmraid-1.0.0_rc16-return-all-sets.patch,
+  +patches/dmraid/dmraid-1.0.0_rc16-static-build-fixes.patch,
+  +patches/dmraid/dmraid-1.0.0_rc16-undo-p-rename.patch,
+  +patches/dmraid/dmraid-1.0.0.rc16-3-staticlink.patch, genkernel.conf:
+  Bug #398467: Update dmraid. Also add other patches from Portage tree.
+
+  12 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> gen_cmdline.sh,
+  gen_compile.sh, gen_determineargs.sh, gen_funcs.sh, genkernel.conf:
+  device-mapper "update". It was merged into LVM2-2.02.67 upstream in 2010.
+  Bug #398467 is wrong for the device-mapper update.
+
+  09 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> defaults/initrd.scripts,
+  defaults/linuxrc:
+  Dogfooding of the /usr mount code with the matching OpenRC change to make the
+  mounts RW revealed some bugs and gotchas in our prior code, now fixed and
+  verified to work.
+
   06 Feb 2012; Robin H. Johnson <robbat2@gentoo.org> arch/alpha/config.sh,
   arch/arm/config.sh, arch/ia64/config.sh, arch/mips/config.sh,
   arch/parisc/config.sh, arch/parisc64/config.sh, arch/ppc/config.sh,
