@@ -299,7 +299,7 @@ run_shell() {
 	/bin/ash
 }
 
-runmdev() {
+mount_devfs () {
 	# Use devtmpfs if enabled in kernel,
 	# else tmpfs. Always run mdev just in case
 	devfs=tmpfs
@@ -314,6 +314,9 @@ runmdev() {
 	# http://git.busybox.net/busybox/plain/docs/mdev.txt
 	mkdir -m 0755 /dev/pts
 	mount -t devpts -o gid=5,mode=0620 devpts /dev/pts  || bad_msg "Failed to mount /dev/pts"
+}
+
+runmdev() {
 	mdev -s  || bad_msg "Failed to receive dynamic updates from mdev"
 }
 
