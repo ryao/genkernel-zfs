@@ -719,16 +719,16 @@ openLUKS() {
 
 	case $1 in
 		root)
-			local TYPE=ROOT
+			local TYPE=ROOT cryptsetup_options="--allow-discards ${CRYPT_ROOT_OPTS}"
 			;;
 		swap)
-			local TYPE=SWAP
+			local TYPE=SWAP cryptsetup_options="--allow-discards ${CRYPT_SWAP_OPTS}"
 			;;
 	esac
 
 	eval local LUKS_DEVICE='"${CRYPT_'${TYPE}'}"' LUKS_NAME="$1" LUKS_KEY='"${CRYPT_'${TYPE}'_KEY}"' LUKS_KEYDEV='"${CRYPT_'${TYPE}'_KEYDEV}"' LUKS_TRIM='"${CRYPT_'${TYPE}'_TRIM}"'
 	local DEV_ERROR=0 KEY_ERROR=0 KEYDEV_ERROR=0
-	local mntkey="/mnt/key/" cryptsetup_options=''
+	local mntkey="/mnt/key/"
 
 	[ ! -e /sbin/cryptsetup ] && bad_msg "The ramdisk does not support LUKS" && exit 1
 	while [ 1 ]
@@ -790,7 +790,6 @@ openLUKS() {
 				if [ "x${LUKS_TRIM}" = "xyes" ]
 				then
 					good_msg "Enabling TRIM support for ${LUKS_NAME}." ${CRYPT_SILENT}
-					cryptsetup_options="${cryptsetup_options} --allow-discards"
 				fi
 
 				if [ -n "${LUKS_KEY}" ] 
@@ -854,10 +853,10 @@ openLUKS() {
 					if [ "$(echo ${LUKS_KEY} | grep -o '.gpg$')" = ".gpg" ] && [ -e /sbin/gpg ] ; then
 						[ -e /dev/tty ] && mv /dev/tty /dev/tty.org
 						mknod /dev/tty c 5 1
-						cryptsetup_options="-d -"
+						cryptsetup_options="${cryptsetup_options} -d -"
 						gpg_cmd="/sbin/gpg --logger-file /dev/null --quiet --decrypt ${mntkey}${LUKS_KEY} |"
 					else
-						cryptsetup_options="-d ${mntkey}${LUKS_KEY}"
+						cryptsetup_options="${cryptsetup_options} -d ${mntkey}${LUKS_KEY}"
 					fi
 				fi
 				# At this point, keyfile or not, we're ready!

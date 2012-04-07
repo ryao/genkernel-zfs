@@ -39,6 +39,8 @@ FAKE_ROOT=''
 REAL_ROOTFLAGS=''
 ROOTFSTYPE='auto'
 CRYPT_SILENT=0
+CRYPT_ROOT_OPTS=''
+CRYPT_SWAP_OPTS=''
 for x in ${CMDLINE}
 do
 	case "${x}" in
@@ -188,8 +190,14 @@ do
 		crypt_root=*)
 			CRYPT_ROOT=${x#*=}
 		;;
+		crypt_root_options=*)
+			CRYPT_ROOT_OPTS=$(echo "${CRYPT_ROOT_OPTS} ${x#*=}" | sed -e 's/,/ /g')
+		;;
 		crypt_swap=*)
 			CRYPT_SWAP=${x#*=}
+		;;
+		crypt_swap_options=*)
+			CRYPT_SWAP_OPTS=$(echo "${CRYPT_SWAP_OPTS} ${x#*=}" | sed -e 's/,/ /g')
 		;;
 		root_key=*)
 			CRYPT_ROOT_KEY=${x#*=}

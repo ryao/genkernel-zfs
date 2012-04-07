@@ -385,8 +385,16 @@ which the ramdisk scripts would recognize.
     This specifies the device encrypted by Luks, which contains the
     root filesystem to mount.
 
+*crypt_root_options=<...>::
+    This specifies options passed when mounting a root device encrypted by Luks.
+    This takes multiple options in the form of a comma-separated list.
+
 *crypt_swap*=<...>::
     This specifies the swap device encrypted by Luks.
+
+*crypt_swap_options=<...>::
+    This specifies options passed when mounting a swap device encrypted by Luks.
+    This takes multiple options in the form of a comma-separated list.
 
 *root_key*=<...>::
     In case your root is encrypted with a key, you can use a device
