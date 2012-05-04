@@ -429,6 +429,46 @@ compile_busybox() {
 	fi
 }
 
+compile_dropbear() {
+	if [ -f "${DROPBEAR_BINCACHE}" ]
+	then
+		print_info 1 "dropbear: >> Using cache"
+	else
+		[ -f "${DROPBEAR_SRCTAR}" ] ||
+			gen_die "Could not find dropbear source tarball: ${DROPBEAR_SRCTAR}! Please place it there, or place another version, changing /etc/genkernel.conf as necessary!"
+		cd "${TEMP}"
+		rm -rf ${DROPBEAR_DIR} > /dev/null
+		/bin/tar -jxpf ${DROPBEAR_SRCTAR} ||
+			gen_die 'Could not extract DROPBEAR source tarball!'
+		[ -d "${DROPBEAR_DIR}" ] ||
+			gen_die "DROPBEAR directory ${DROPBEAR_DIR} is invalid!"
+		cd "${DROPBEAR_DIR}"
+		apply_patches dropbear ${DROPBEAR_VER}
+		print_info 1 'dropbear: >> Configuring...'
+			CFLAGS="-fPIC" \
+			./configure --prefix=/ --disable-zlib --disable-pam \
+				--enable-openpty --disable-syslog \
+				>> ${LOGFILE} 2>&1 || \
+				gen_die 'Configure of dropbear failed!'
+		print_info 1 'dropbear: >> Compiling...'
+		MAKE=${UTILS_MAKE} MULTI=1 STATIC=1 \
+		PROGS="dropbear dbclient dropbearkey dropbearconvert scp" \
+			compile_generic 'all' utils
+		compile_generic "install DESTDIR=${TEMP}/dropbear/" utils
+
+		cd "${TEMP}/dropbear"
+		print_info 1 '      >> Copying to bincache...'
+		${UTILS_CROSS_COMPILE}strip "sbin/dropbear" ||
+			gen_die 'Could not strip dropbear!'
+		/bin/tar -cjf "${DROPBEAR_BINCACHE}" . ||
+			gen_die 'Could not create binary cache'
+
+		cd "${TEMP}"
+		rm -rf "${TEMP}/dropbear" > /dev/null
+		rm -rf "${DROPBEAR_DIR}" dropbear
+	fi
+}
+
 compile_lvm() {
 	if [ -f "${LVM_BINCACHE}" ]
 	then

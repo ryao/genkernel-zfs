@@ -116,6 +116,35 @@ append_busybox() {
 	rm -rf "${TEMP}/initramfs-busybox-temp" > /dev/null
 }
 
+append_dropbear() {
+	if [ -d "${TEMP}/initramfs-dropbear-temp" ]
+	then
+		rm -rf "${TEMP}/initramfs-dropbear-temp" > /dev/null
+	fi
+
+	print_info 1 '          DROPBEAR: Adding support (compiling binaries)...'
+	compile_dropbear
+
+	mkdir -p "${TEMP}/initramfs-dropbear-temp/"
+	tar -xjf "${DROPBEAR_BINCACHE}" -C "${TEMP}/initramfs-dropbear-temp/" ||
+		gen_die 'Could not extract dropbear bincache!'
+	#chmod +x "${TEMP}/initramfs-dropbear-temp/bin/dropbearmulti"
+
+	# Set up a few default symlinks
+	#for i in ${DROPBEAR_APPLETS:-[ dropbear dropbearkey scp}; do
+	#	rm -f ${TEMP}/initramfs-dropbear-temp/bin/$i > /dev/null
+	#	ln -s dropbear ${TEMP}/initramfs-dropbear-temp/bin/$i ||
+	#		gen_die "Dropbear error: could not link ${i}!"
+	#done
+
+	cd "${TEMP}/initramfs-dropbear-temp/"
+	find . -print | cpio ${CPIO_ARGS} --append -F "${CPIO}" \
+			|| gen_die "compressing dropbear cpio"
+	cd "${TEMP}"
+	rm -rf "${TEMP}/initramfs-dropbear-temp" > /dev/null
+
+}
+
 append_blkid(){
 	if [ -d "${TEMP}/initramfs-blkid-temp" ]
 	then
@@ -677,6 +706,7 @@ create_initramfs() {
 	append_data 'base_layout'
 	append_data 'auxilary' "${BUSYBOX}"
 	append_data 'busybox' "${BUSYBOX}"
+	append_data 'dropbear' "${DROPBEAR}"
 	append_data 'lvm' "${LVM}"
 	append_data 'dmraid' "${DMRAID}"
 	append_data 'iscsi' "${ISCSI}"

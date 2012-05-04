@@ -113,6 +113,7 @@ determine_real_args() {
 	set_config_with_override BOOL   DMRAID               CMD_DMRAID
 	set_config_with_override BOOL   ISCSI                CMD_ISCSI
 	set_config_with_override BOOL   BUSYBOX              CMD_BUSYBOX              "yes"
+	set_config_with_override BOOL   DROPBEAR             CMD_DROPBEAR
 	set_config_with_override BOOL   UNIONFS              CMD_UNIONFS
 	set_config_with_override BOOL   NETBOOT              CMD_NETBOOT
 	set_config_with_override STRING REAL_ROOT            CMD_REAL_ROOT
@@ -138,6 +139,7 @@ determine_real_args() {
 
 	CACHE_DIR=`arch_replace "${CACHE_DIR}"`
 	BUSYBOX_BINCACHE=`cache_replace "${BUSYBOX_BINCACHE}"`
+	DROPBEAR_BINCACHE=`cache_replace "${DROPBEAR_BINCACHE}"`
 	LVM_BINCACHE=`cache_replace "${LVM_BINCACHE}"`
 	MDADM_BINCACHE=`cache_replace "${MDADM_BINCACHE}"`
 	DMRAID_BINCACHE=`cache_replace "${DMRAID_BINCACHE}"`
@@ -149,6 +151,7 @@ determine_real_args() {
 
 	DEFAULT_KERNEL_CONFIG=`arch_replace "${DEFAULT_KERNEL_CONFIG}"`
 	BUSYBOX_CONFIG=`arch_replace "${BUSYBOX_CONFIG}"`
+	DROPBEAR_CONFIG=`arch_replace "${DROPBEAR_CONFIG}"`
 	BUSYBOX_BINCACHE=`arch_replace "${BUSYBOX_BINCACHE}"`
 	LVM_BINCACHE=`arch_replace "${LVM_BINCACHE}"`
 	MDADM_BINCACHE=`arch_replace "${MDADM_BINCACHE}"`

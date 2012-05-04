@@ -297,6 +297,9 @@ INITIALIZATION
 *--*[*no-*]*busybox*::
     Includes or excludes busybox in the initrd or initramfs.
 
+*--*[*no-*]*dropbear*::
+    Includes or excludes dropbear in the initrd or initramfs.
+
 *--*[*no-*]*unionfs*::
     Includes or excludes support for unionfs
 
@@ -599,6 +602,7 @@ AUTHORS
 - GnuPG 1.x integration by dacook <schism@subverted.org>
 - MDADM integration by Matthias Dahl <ua_bugz_gentoo@mortal-soul.de>
 - ZFS integration by Richard Yao <ryao@cs.stonybrook.edu>
+- Dropbear Support by Richard Yao <ryao@cs.stonybrook.edu>
 
 
 SEE ALSO
